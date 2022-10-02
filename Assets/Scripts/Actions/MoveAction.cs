@@ -1,9 +1,15 @@
+using System;
 using System.Collections;
 using System.Collections.Generic;
 using UnityEngine;
 
 public class MoveAction : BaseAction
 {
+    public override string GetActionName()
+    {
+        return "Move";
+    }
+
     [SerializeField] private Animator unitAnimator;
     private Vector3 targetPosition;
     [SerializeField] private int maxMoveDistance = 4;
@@ -34,6 +40,8 @@ public class MoveAction : BaseAction
         {
             unitAnimator.SetBool("IsMoving", false);
             isActive = false;
+
+            onActionComplete();
         }
 
     }
@@ -49,8 +57,10 @@ public class MoveAction : BaseAction
             return false;
     }
 
-    public void Move(GridPosition _gridPosition)
+    public void Move(GridPosition _gridPosition, Action _onActionCompleteCallback)
     {
+        this.onActionComplete = _onActionCompleteCallback;
+
         this.targetPosition = LevelGrid.Instance.GetWorldPosition(_gridPosition);
         isActive = true;
     }

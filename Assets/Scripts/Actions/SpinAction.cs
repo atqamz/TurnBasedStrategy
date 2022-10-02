@@ -1,10 +1,15 @@
+using System;
 using System.Collections;
 using System.Collections.Generic;
 using UnityEngine;
 
 public class SpinAction : BaseAction
 {
-    public delegate void SpinCompleteDelegate();
+    public override string GetActionName()
+    {
+        return "Spin";
+    }
+
     private float totalSpinAmount;
 
     private void Update()
@@ -16,11 +21,15 @@ public class SpinAction : BaseAction
         totalSpinAmount += spinAddAmount;
 
         if (totalSpinAmount >= 360f)
+        {
             isActive = false;
+            onActionComplete?.Invoke();
+        }
     }
 
-    public void Spin(SpinCompleteDelegate ClearBusy)
+    public void Spin(Action _onActionCompleteCallback)
     {
+        this.onActionComplete = _onActionCompleteCallback;
         isActive = true;
         totalSpinAmount = 0f;
     }
