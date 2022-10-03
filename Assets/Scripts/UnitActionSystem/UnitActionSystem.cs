@@ -2,6 +2,7 @@ using System;
 using System.Collections;
 using System.Collections.Generic;
 using UnityEngine;
+using UnityEngine.EventSystems;
 
 public class UnitActionSystem : MonoBehaviour
 {
@@ -19,51 +20,50 @@ public class UnitActionSystem : MonoBehaviour
     }
 
     public event EventHandler OnSelectedUnitChanged;
+    public event EventHandler OnSelectedActionChanged;
+    public event EventHandler<bool> OnBusyChanged;
+
     [SerializeField] private Unit selectedUnit;
     [SerializeField] private LayerMask unitLayerMask;
+
+    private BaseAction selectedAction;
+
     public bool isBusy;
 
+    private void Start()
+    {
+        SetSelectedUnit(selectedUnit);
+    }
 
     private void Update()
     {
         if (isBusy) return;
 
-        if (LeftMouseClick())
-        {
-            if (HandleUnitSelection()) return;
-            if (HandleUnitMovement()) return;
-        }
+        if (EventSystem.current.IsPointerOverGameObject()) return;
 
-        if (RightMouseClick())
-        {
-            SetBusy();
-            selectedUnit.GetSpinAction().Spin(ClearBusy);
-        }
+        if (HandleSelectedUnit()) return;
+
+        HandleSelectedAction();
     }
 
     public void SetBusy()
     {
         isBusy = true;
+
+        OnBusyChanged?.Invoke(this, isBusy);
     }
 
     public void ClearBusy()
     {
         isBusy = false;
-    }
 
-    private bool LeftMouseClick()
-    {
-        return Input.GetMouseButtonDown(0);
-    }
-
-    private bool RightMouseClick()
-    {
-        return Input.GetMouseButtonDown(1);
+        OnBusyChanged?.Invoke(this, isBusy);
     }
 
     private void SetSelectedUnit(Unit _unit)
     {
         selectedUnit = _unit;
+        SetSelectedAction(_unit.GetMoveAction());
 
         OnSelectedUnitChanged?.Invoke(this, EventArgs.Empty);
     }
@@ -73,38 +73,52 @@ public class UnitActionSystem : MonoBehaviour
         return selectedUnit;
     }
 
-    private bool HandleUnitSelection()
+    public void SetSelectedAction(BaseAction _action)
     {
-        Ray ray = Camera.main.ScreenPointToRay(Input.mousePosition);
+        selectedAction = _action;
 
-        if (Physics.Raycast(ray, out RaycastHit raycastHitInfo, float.MaxValue, unitLayerMask))
+        OnSelectedActionChanged?.Invoke(this, EventArgs.Empty);
+    }
+
+    public BaseAction GetSelectedAction()
+    {
+        return selectedAction;
+    }
+
+    private bool HandleSelectedUnit()
+    {
+        if (Input.GetMouseButtonDown(0))
         {
-            if (raycastHitInfo.transform.TryGetComponent<Unit>(out Unit unit))
-            {
-                SetSelectedUnit(unit);
+            Ray ray = Camera.main.ScreenPointToRay(Input.mousePosition);
 
-                return true;
+            if (Physics.Raycast(ray, out RaycastHit raycastHitInfo, float.MaxValue, unitLayerMask))
+            {
+                if (raycastHitInfo.transform.TryGetComponent<Unit>(out Unit _unit))
+                {
+                    // if unit already selected
+                    if (_unit == selectedUnit) return false;
+
+                    SetSelectedUnit(_unit);
+
+                    return true;
+                }
             }
         }
 
         return false;
     }
 
-    private bool HandleUnitMovement()
+    private void HandleSelectedAction()
     {
-        SetBusy();
-
-        if (selectedUnit != null)
+        if (Input.GetMouseButtonDown(0))
         {
             GridPosition mouseGridPosition = LevelGrid.Instance.GetGridPosition(MouseWorld.GetPosition());
-            if (selectedUnit.GetMoveAction().IsValidActionGridPosition(mouseGridPosition))
+
+            if (selectedAction.IsValidActionGridPosition(mouseGridPosition))
             {
-                selectedUnit.GetMoveAction().Move(mouseGridPosition, ClearBusy);
+                SetBusy();
+                selectedAction.TakeAction(mouseGridPosition, ClearBusy);
             }
-
-            return true;
         }
-
-        return false;
     }
 }

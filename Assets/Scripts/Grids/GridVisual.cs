@@ -58,9 +58,9 @@ public class GridVisual : MonoBehaviour
 
     public void ShowGridVisualList(List<GridPosition> _gridPositionList)
     {
-        foreach (GridPosition gridPosition in _gridPositionList)
+        foreach (GridPosition _gridPosition in _gridPositionList)
         {
-            gridVisualObjectArray[gridPosition.x, gridPosition.z].Show();
+            gridVisualObjectArray[_gridPosition.x, _gridPosition.z].Show();
         }
     }
 
@@ -68,8 +68,8 @@ public class GridVisual : MonoBehaviour
     {
         HideAllGridVisual();
 
-        Unit selectedUnit = UnitActionSystem.Instance.GetSelectedUnit();
-        if (selectedUnit != null)
-            ShowGridVisualList(selectedUnit.GetMoveAction().GetValidActionGridPositionList());
+        BaseAction selectedAction = UnitActionSystem.Instance.GetSelectedAction();
+        if (selectedAction != null)
+            ShowGridVisualList(selectedAction.GetValidActionGridPositionList());
     }
 }

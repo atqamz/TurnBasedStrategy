@@ -5,11 +5,32 @@ using UnityEngine;
 
 public class SpinAction : BaseAction
 {
+    // parent override
+    // ==========================================================================================
     public override string GetActionName()
     {
         return "Spin";
     }
 
+    public override void TakeAction(GridPosition _gridPosition, Action _onActionCompleteCallback)
+    {
+        this.onActionComplete = _onActionCompleteCallback;
+        isActive = true;
+        totalSpinAmount = 0f;
+    }
+
+    public override List<GridPosition> GetValidActionGridPositionList()
+    {
+        List<GridPosition> validGridPositionList = new List<GridPosition>();
+
+        GridPosition unitGridPosition = unit.GetGridPosition();
+
+        return new List<GridPosition> { unitGridPosition };
+    }
+    // ==========================================================================================
+
+    // child
+    // ==========================================================================================
     private float totalSpinAmount;
 
     private void Update()
@@ -25,12 +46,5 @@ public class SpinAction : BaseAction
             isActive = false;
             onActionComplete?.Invoke();
         }
-    }
-
-    public void Spin(Action _onActionCompleteCallback)
-    {
-        this.onActionComplete = _onActionCompleteCallback;
-        isActive = true;
-        totalSpinAmount = 0f;
     }
 }

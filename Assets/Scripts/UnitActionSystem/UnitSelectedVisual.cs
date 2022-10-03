@@ -1,3 +1,4 @@
+using System;
 using System.Collections;
 using System.Collections.Generic;
 using UnityEngine;
@@ -19,7 +20,7 @@ public class UnitSelectedVisual : MonoBehaviour
         UpdateVisual();
     }
 
-    private void UnitActionSystem_OnSelectedUnitChange(object sender, System.EventArgs empty)
+    private void UnitActionSystem_OnSelectedUnitChange(object _sender, EventArgs _e)
     {
         UpdateVisual();
     }
