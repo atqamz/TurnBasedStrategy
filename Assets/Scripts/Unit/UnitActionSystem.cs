@@ -22,6 +22,7 @@ public class UnitActionSystem : MonoBehaviour
     public event EventHandler OnSelectedUnitChanged;
     public event EventHandler OnSelectedActionChanged;
     public event EventHandler<bool> OnBusyChanged;
+    public event EventHandler OnActionStarted;
 
     [SerializeField] private Unit selectedUnit;
     [SerializeField] private LayerMask unitLayerMask;
@@ -91,18 +92,15 @@ public class UnitActionSystem : MonoBehaviour
         {
             Ray ray = Camera.main.ScreenPointToRay(Input.mousePosition);
 
-            if (Physics.Raycast(ray, out RaycastHit raycastHitInfo, float.MaxValue, unitLayerMask))
-            {
-                if (raycastHitInfo.transform.TryGetComponent<Unit>(out Unit _unit))
-                {
-                    // if unit already selected
-                    if (_unit == selectedUnit) return false;
+            if (!Physics.Raycast(ray, out RaycastHit raycastHitInfo, float.MaxValue, unitLayerMask)) return false;
 
-                    SetSelectedUnit(_unit);
+            if (!raycastHitInfo.transform.TryGetComponent<Unit>(out Unit _unit)) return false;
 
-                    return true;
-                }
-            }
+            // if unit already selected
+            if (_unit == selectedUnit) return false;
+
+            SetSelectedUnit(_unit);
+            return true;
         }
 
         return false;
@@ -114,11 +112,14 @@ public class UnitActionSystem : MonoBehaviour
         {
             GridPosition mouseGridPosition = LevelGrid.Instance.GetGridPosition(MouseWorld.GetPosition());
 
-            if (selectedAction.IsValidActionGridPosition(mouseGridPosition))
-            {
-                SetBusy();
-                selectedAction.TakeAction(mouseGridPosition, ClearBusy);
-            }
+            if (!selectedAction.IsValidActionGridPosition(mouseGridPosition)) return;
+
+            if (!selectedUnit.TrySpendActionPoint(selectedAction)) return;
+
+            SetBusy();
+            selectedAction.TakeAction(mouseGridPosition, ClearBusy);
+
+            OnActionStarted?.Invoke(this, EventArgs.Empty);
         }
     }
 }

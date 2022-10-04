@@ -3,11 +3,13 @@ using System.Collections;
 using System.Collections.Generic;
 using UnityEngine;
 using UnityEngine.UI;
+using TMPro;
 
 public class UnitActionSystemUI : MonoBehaviour
 {
     [SerializeField] Transform unitActionButtonContainerTransform;
     [SerializeField] Transform unitActionButtonPrefab;
+    [SerializeField] TextMeshProUGUI unitActionPointText;
 
     private List<UnitActionButtonUI> unitActionButtonUIList;
 
@@ -20,9 +22,11 @@ public class UnitActionSystemUI : MonoBehaviour
     {
         UnitActionSystem.Instance.OnSelectedUnitChanged += UnitActionSystem_OnSelectedUnitChanged;
         UnitActionSystem.Instance.OnSelectedActionChanged += UnitActionSystem_OnSelectedActionChanged;
+        UnitActionSystem.Instance.OnActionStarted += UnitActionSystem_OnActionStarted;
 
         CreateUnitActionButtons();
         UpdateSelectedVisual();
+        UpdateActionPointText();
     }
     // ==========================================================================================
 
@@ -32,11 +36,17 @@ public class UnitActionSystemUI : MonoBehaviour
     {
         CreateUnitActionButtons();
         UpdateSelectedVisual();
+        UpdateActionPointText();
     }
 
     private void UnitActionSystem_OnSelectedActionChanged(object _sender, EventArgs _e)
     {
         UpdateSelectedVisual();
+    }
+
+    private void UnitActionSystem_OnActionStarted(object _sender, EventArgs _e)
+    {
+        UpdateActionPointText();
     }
     // ==========================================================================================
 
@@ -69,5 +79,11 @@ public class UnitActionSystemUI : MonoBehaviour
         {
             _unitActionButtonUI.UpdateSelectedVisual();
         }
+    }
+
+    private void UpdateActionPointText()
+    {
+        Unit selectedUnit = UnitActionSystem.Instance.GetSelectedUnit();
+        unitActionPointText.text = "Action Point: " + selectedUnit.GetActionPoint();
     }
 }
