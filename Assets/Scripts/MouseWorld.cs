@@ -4,10 +4,20 @@ namespace TurnBasedStrategy
 {
     public class MouseWorld : MonoBehaviour
     {
-        private void Update()
+        public static MouseWorld instance;
+        [SerializeField] private LayerMask mouseWorldLayerMask;
+
+        private void Awake()
+        {
+            instance = this;
+        }
+
+
+        public static Vector3 GetPosition()
         {
             Ray ray = Camera.main.ScreenPointToRay(Input.mousePosition);
-            Debug.Log(Physics.Raycast(ray));
+            Physics.Raycast(ray, out RaycastHit hitInfo, float.MaxValue, instance.mouseWorldLayerMask);
+            return hitInfo.point;
         }
     }
 }
