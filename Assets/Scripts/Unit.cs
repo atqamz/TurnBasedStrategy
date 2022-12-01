@@ -8,9 +8,9 @@ namespace TurnBasedStrategy
 
         private void Update()
         {
-            if (Input.GetKeyDown(KeyCode.T))
+            if (Input.GetMouseButtonDown(0))
             {
-                SetTargetPosition(new Vector3(4, 0, 4));
+                SetTargetPosition(MouseWorld.GetPosition());
             }
 
             MoveToTargetPosition();
