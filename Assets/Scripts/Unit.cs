@@ -4,6 +4,7 @@ namespace TurnBasedStrategy
 {
     public class Unit : MonoBehaviour
     {
+        [SerializeField] private Animator unitAnimatorComponent;
         private Vector3 targetPosition;
 
         private void Update()
@@ -25,6 +26,11 @@ namespace TurnBasedStrategy
             {
                 Vector3 moveDirection = (targetPosition - transform.position).normalized;
                 transform.position += moveDirection * moveSpeed * Time.deltaTime;
+                unitAnimatorComponent.SetBool("IsWalking", true);
+            }
+            else
+            {
+                unitAnimatorComponent.SetBool("IsWalking", false);
             }
         }
 
