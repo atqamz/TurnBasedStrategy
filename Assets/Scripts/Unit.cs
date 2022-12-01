@@ -21,11 +21,15 @@ namespace TurnBasedStrategy
         {
             float stopDistance = .1f;
             float moveSpeed = 4f;
+            float rotateSpeed = 10f;
 
             if (Vector3.Distance(transform.position, targetPosition) > stopDistance)
             {
                 Vector3 moveDirection = (targetPosition - transform.position).normalized;
                 transform.position += moveDirection * moveSpeed * Time.deltaTime;
+
+                transform.forward = Vector3.Lerp(transform.forward, moveDirection, Time.deltaTime * rotateSpeed);
+
                 unitAnimatorComponent.SetBool("IsWalking", true);
             }
             else
